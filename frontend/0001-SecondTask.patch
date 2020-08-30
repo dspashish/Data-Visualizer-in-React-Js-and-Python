@@ -1,0 +1,103 @@
+From 83855cc31ae3658360f73bb2f1d1572dc3579277 Mon Sep 17 00:00:00 2001
+From: dspashish <mrpycoder@gmail.com>
+Date: Sat, 20 Jun 2020 15:40:55 +0530
+Subject: [PATCH] SecondTask
+
+---
+ mintty.exe.stackdump | 10 ++++++++++
+ src/App.tsx          |  6 +++++-
+ src/Graph.tsx        |  8 +++++++-
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+ create mode 100644 mintty.exe.stackdump
+
+diff --git a/mintty.exe.stackdump b/mintty.exe.stackdump
+new file mode 100644
+index 0000000..b9e4b05
+--- /dev/null
++++ b/mintty.exe.stackdump
+@@ -0,0 +1,10 @@
++Exception: STATUS_ACCESS_VIOLATION at eip=001703D0
++eax=00000000 ebx=0045028B ecx=0022C5DC edx=779970B4 esi=004A0410 edi=80000000
++ebp=0022CB58 esp=0022C624 program=F:\Git\usr\bin\mintty.exe, pid 647, thread main
++cs=001B ds=0023 es=0023 fs=003B gs=0000 ss=0023
++Stack trace:
++Frame     Function  Args
++0022CB58  001703D0 (20071058, 20071062, 0022CD28, 6100AFA5)
++0022CD28  6100AFA5 (00000000, 0022CD84, 61009DD0, 00000000)
++0022CD84  610088B2 (00000000, 00000000, 00000000, 00000000)
++End of stack trace
+diff --git a/src/App.tsx b/src/App.tsx
+index 0728518..1026324 100755
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -8,6 +8,7 @@ import './App.css';
+  */
+ interface IState {
+   data: ServerRespond[],
++  showGraph: boolean,
+ }
+ 
+ /**
+@@ -22,6 +23,7 @@ class App extends Component<{}, IState> {
+       // data saves the server responds.
+       // We use this state to parse data down to the child element (Graph) as element property
+       data: [],
++      showGraph: false,
+     };
+   }
+ 
+@@ -29,7 +31,9 @@ class App extends Component<{}, IState> {
+    * Render Graph react component with state.data parse as property data
+    */
+   renderGraph() {
++    if (this.state.showGraph){
+     return (<Graph data={this.state.data}/>)
++    } 
+   }
+ 
+   /**
+@@ -39,7 +43,7 @@ class App extends Component<{}, IState> {
+     DataStreamer.getData((serverResponds: ServerRespond[]) => {
+       // Update the state by creating a new array of data that consists of
+       // Previous data in the state and the new data from server
+-      this.setState({ data: [...this.state.data, ...serverResponds] });
++      this.setState({ data: [...this.state.data, ...serverResponds], showGraph: true });
+     });
+   }
+ 
+diff --git a/src/Graph.tsx b/src/Graph.tsx
+index ec1430e..6850386 100644
+--- a/src/Graph.tsx
++++ b/src/Graph.tsx
+@@ -14,7 +14,7 @@ interface IProps {
+  * Perspective library adds load to HTMLElement prototype.
+  * This interface acts as a wrapper for Typescript compiler.
+  */
+-interface PerspectiveViewerElement {
++interface PerspectiveViewerElement extends HTMLElement {
+   load: (table: Table) => void,
+ }
+ 
+@@ -38,6 +38,7 @@ class Graph extends Component<IProps, {}> {
+       stock: 'string',
+       top_ask_price: 'float',
+       top_bid_price: 'float',
++      price_abc: 'float',
+       timestamp: 'date',
+     };
+ 
+@@ -49,6 +50,11 @@ class Graph extends Component<IProps, {}> {
+ 
+       // Add more Perspective configurations here.
+       elem.load(this.table);
++      elem.setAttribute('view', 'y_line');
++      elem.setAttribute('column-pivots', '["stock"]');
++      elem.setAttribute('row-pivots', '["timestamp"]');
++      elem.setAttribute('columns', '["top_ask_price"]');
++      elem.setAttribute('aggregates', '{"stock": "distinct count", "top_ask_price":"avg", "top_bid_price":"avg", "timestamp":"distinct count"}');
+     }
+   }
+ 
+-- 
+2.27.0.windows.1
+
